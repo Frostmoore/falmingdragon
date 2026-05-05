@@ -7,6 +7,7 @@ namespace App\Services\Command;
 use App\Enums\ExecutionMode;
 use App\Models\AllowedCommand;
 use App\Services\Security\AllowListGuard;
+use App\Services\Security\ConfirmationGate;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\Log;
 class CommandRouter
 {
     public function __construct(
-        private readonly AllowListGuard $guard,
+        private readonly AllowListGuard    $guard,
+        private readonly ConfirmationGate  $gate,
     ) {}
 
     /**
@@ -46,9 +48,7 @@ class CommandRouter
             commandName:          $definition->name,
             arguments:            $arguments,
             definition:           $definition,
-            requiresConfirmation: $definition->is_dangerous
-                && ! $definition->skip_confirmation
-                && config('flamingdragon.security.dangerous_commands_require_confirmation', true),
+            requiresConfirmation: $this->gate->requiresGate($definition),
             executionMode:        $executionMode,
             naturalLanguageInput: $naturalLanguage,
         );

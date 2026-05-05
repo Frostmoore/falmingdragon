@@ -9,11 +9,11 @@ use App\Services\Agent\AgentSpawner;
 use App\Services\Command\CommandRouter;
 use App\Services\Command\ParsedCommand;
 use App\Services\Generator\GeneratorService;
+use App\Services\Security\ConfirmationGate;
 use App\Services\Telegram\TelegramParser;
 use App\Services\Telegram\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -25,6 +25,7 @@ class TelegramWebhookController extends Controller
         private readonly CommandRouter    $router,
         private readonly AgentSpawner     $spawner,
         private readonly GeneratorService $generator,
+        private readonly ConfirmationGate $confirmationGate,
     ) {}
 
     /**
@@ -136,16 +137,10 @@ class TelegramWebhookController extends Controller
 
             // --- Dangerous command: require confirmation ---
             if ($parsedCommand->requiresConfirmation) {
-                Cache::put(
-                    "fd_pending_command:{$chatId}",
-                    ['command' => $parsedCommand->commandName, 'args' => $parsedCommand->arguments],
-                    now()->addMinutes(5)
-                );
-
+                $this->confirmationGate->store($chatId, $parsedCommand);
                 $this->telegram->sendMessage(
                     $chatId,
-                    "⚠️ <b>Dangerous command:</b> <code>{$parsedCommand->commandName}</code>\n\n"
-                    . "Send /confirm to execute or /deny to cancel."
+                    $this->confirmationGate->buildPrompt($parsedCommand->definition)
                 );
                 return response('', 200);
             }
@@ -165,23 +160,22 @@ class TelegramWebhookController extends Controller
 
     private function handleConfirm(int $chatId, ?int $messageId): Response
     {
-        $pending = Cache::get("fd_pending_command:{$chatId}");
+        $pending = $this->confirmationGate->retrieve($chatId);
 
         if ($pending === null) {
-            $this->telegram->sendMessage($chatId, 'No pending command to confirm.');
+            $this->telegram->sendMessage($chatId, 'Nessun comando in attesa di conferma.');
             return response('', 200);
         }
 
-        Cache::forget("fd_pending_command:{$chatId}");
+        $this->confirmationGate->clear($chatId);
 
         $parsedCommand = $this->router->route($pending['command'], $pending['args'] ?? []);
 
         if ($parsedCommand === null) {
-            $this->telegram->sendMessage($chatId, 'The pending command is no longer available.');
+            $this->telegram->sendMessage($chatId, 'Il comando in attesa non è più disponibile.');
             return response('', 200);
         }
 
-        // Temporarily bypass confirmation flag for this execution
         $result = $this->spawner->spawn($parsedCommand, $messageId, $chatId);
         $this->telegram->sendLongMessage($chatId, $result);
 
@@ -190,8 +184,8 @@ class TelegramWebhookController extends Controller
 
     private function handleDeny(int $chatId): Response
     {
-        Cache::forget("fd_pending_command:{$chatId}");
-        $this->telegram->sendMessage($chatId, 'Command cancelled.');
+        $this->confirmationGate->clear($chatId);
+        $this->telegram->sendMessage($chatId, 'Comando annullato.');
         return response('', 200);
     }
 
