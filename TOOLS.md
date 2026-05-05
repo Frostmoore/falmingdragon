@@ -1,6 +1,6 @@
 > ⚠️ File generato automaticamente da `php artisan fd:export-registry`.
 > Non modificare a mano: le modifiche vanno fatte nel DB/seeder, poi riesegui l'export.
-> Ultima generazione: 2026-05-05T15:32:31+00:00
+> Ultima generazione: 2026-05-05T15:36:26+00:00
 
 # TOOLS.md — Tool Registry
 
@@ -8,7 +8,7 @@
 
 - [audio](#audio) — `generate_audio`, `transcribe_audio`
 - [calendario](#calendario) — `google_calendar_create`, `google_calendar_delete`, `google_calendar_list`
-- [dati](#dati) — `cron_list`, `db_query`, `memory_read`, `memory_write`
+- [dati](#dati) — `cron_list`, `db_query`, `memory_read`, `memory_write`, `working_memory_append`, `working_memory_read`
 - [documenti](#documenti) — `generate_docx`, `generate_pdf`, `generate_qr`, `generate_xlsx`
 - [email](#email) — `gmail_list`, `gmail_mark_read`, `gmail_read`, `gmail_search`, `gmail_send`, `gmail_trash`, `send_email`
 - [infrastruttura](#infrastruttura) — `composer_operation`, `git_operation`, `npm_operation`
@@ -128,6 +128,26 @@
 - name: memory_write
   display_name: "Memory Write"
   description: "Write an entry to the persistent memory store."
+  category: dati
+  risk_level: safe
+  requires_confirmation: false
+  env_required: []
+```
+
+```yaml
+- name: working_memory_append
+  display_name: "Working Memory — Append"
+  description: "Append a timestamped line to WORKINGMEMORY.md. Auto-truncates to ~10.000 token limit (oldest lines removed first)."
+  category: dati
+  risk_level: safe
+  requires_confirmation: false
+  env_required: []
+```
+
+```yaml
+- name: working_memory_read
+  display_name: "Working Memory — Read"
+  description: "Read WORKINGMEMORY.md content. Pass last_lines=N to get only the most recent N entries."
   category: dati
   risk_level: safe
   requires_confirmation: false
@@ -665,4 +685,5 @@
 
 ## Changelog
 
+- [2026-05-05T15:36:26+00:00] Added: working_memory_append, working_memory_read
 - [2026-05-05T15:32:31+00:00] Initial export. 56 tool registrati.

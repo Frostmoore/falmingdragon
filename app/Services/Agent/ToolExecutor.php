@@ -153,6 +153,9 @@ class ToolExecutor
             'transcribe_audio'      => $this->runTranscribeAudio($args),
             'generate_audio'        => $this->runGenerateAudio($args),
             'send_telegram_voice'   => $this->runSendTelegramVoice($args),
+            // Working memory
+            'working_memory_append' => $this->runWorkingMemoryAppend($args),
+            'working_memory_read'   => $this->runWorkingMemoryRead($args),
             default                 => throw new RuntimeException("Unknown tool: {$toolName}"),
         };
     }
@@ -1688,5 +1691,37 @@ class ToolExecutor
         } catch (Throwable $e) {
             Log::error('[ToolExecutor] Failed to log step.', ['error' => $e->getMessage()]);
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Working memory tools
+    // -------------------------------------------------------------------------
+
+    /**
+     * Append a line to WORKINGMEMORY.md via WorkingMemoryService.
+     * $args: line (string, required)
+     */
+    private function runWorkingMemoryAppend(array $args): string
+    {
+        $line = $args['line'] ?? throw new RuntimeException('working_memory_append: missing "line".');
+
+        $service = app(\App\Services\Memory\WorkingMemoryService::class);
+        $service->append((string) $line);
+
+        return "Appended to working memory: {$line}";
+    }
+
+    /**
+     * Read WORKINGMEMORY.md via WorkingMemoryService.
+     * $args: last_lines (integer, optional) — if omitted, returns full content.
+     */
+    private function runWorkingMemoryRead(array $args): string
+    {
+        $lastLines = isset($args['last_lines']) ? (int) $args['last_lines'] : null;
+
+        $service = app(\App\Services\Memory\WorkingMemoryService::class);
+        $content = $service->read($lastLines);
+
+        return $content ?: '(Working memory is empty)';
     }
 }

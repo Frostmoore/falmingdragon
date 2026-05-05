@@ -565,6 +565,25 @@ class DefaultToolsSeeder extends Seeder
                 'risk_level'            => 'safe',
                 'requires_confirmation' => false,
             ],
+            // Working memory
+            [
+                'name'                  => 'working_memory_append',
+                'display_name'          => 'Working Memory — Append',
+                'description'           => 'Append a timestamped line to WORKINGMEMORY.md. Auto-truncates to ~10.000 token limit (oldest lines removed first).',
+                'type'                  => 'builtin',
+                'handler_class'         => null,
+                'risk_level'            => 'safe',
+                'requires_confirmation' => false,
+            ],
+            [
+                'name'                  => 'working_memory_read',
+                'display_name'          => 'Working Memory — Read',
+                'description'           => 'Read WORKINGMEMORY.md content. Pass last_lines=N to get only the most recent N entries.',
+                'type'                  => 'builtin',
+                'handler_class'         => null,
+                'risk_level'            => 'safe',
+                'requires_confirmation' => false,
+            ],
         ];
 
         foreach ($tools as $tool) {
