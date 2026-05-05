@@ -1,6 +1,6 @@
 > ⚠️ File generato automaticamente da `php artisan fd:export-registry`.
 > Non modificare a mano: le modifiche vanno fatte nel DB/seeder, poi riesegui l'export.
-> Ultima generazione: 2026-05-05T15:36:26+00:00
+> Ultima generazione: 2026-05-05T15:41:25+00:00
 
 # TOOLS.md — Tool Registry
 
@@ -32,6 +32,7 @@
   description: "Generate speech from text using OpenAI TTS. Returns local path to the generated MP3."
   category: audio
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - OPENAI_API_KEY
@@ -43,6 +44,7 @@
   description: "Transcribe an audio file to text using OpenAI Whisper."
   category: audio
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - OPENAI_API_KEY
@@ -56,6 +58,7 @@
   description: "Create a new Google Calendar event."
   category: calendario
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required:
     - GOOGLE_CLIENT_ID
@@ -70,6 +73,7 @@
   description: "Delete a Google Calendar event by ID."
   category: calendario
   risk_level: dangerous
+  risk_category: file_delete
   requires_confirmation: true
   env_required:
     - GOOGLE_CLIENT_ID
@@ -84,6 +88,7 @@
   description: "List upcoming events from Google Calendar (requires OAuth2 credentials in .env)."
   category: calendario
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - GOOGLE_CLIENT_ID
@@ -100,6 +105,7 @@
   description: "List all scheduled FlamingDragon tasks (Laravel scheduler)."
   category: dati
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -110,7 +116,8 @@
   description: "Run a read-only SELECT query on the application database."
   category: dati
   risk_level: moderate
-  requires_confirmation: false
+  risk_category: db_destructive
+  requires_confirmation: true
   env_required: []
 ```
 
@@ -120,6 +127,7 @@
   description: "Read entries from the persistent memory store."
   category: dati
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -130,6 +138,7 @@
   description: "Write an entry to the persistent memory store."
   category: dati
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -140,6 +149,7 @@
   description: "Append a timestamped line to WORKINGMEMORY.md. Auto-truncates to ~10.000 token limit (oldest lines removed first)."
   category: dati
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -150,6 +160,7 @@
   description: "Read WORKINGMEMORY.md content. Pass last_lines=N to get only the most recent N entries."
   category: dati
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -162,6 +173,7 @@
   description: "Generate a .docx Word document (requires phpoffice/phpword)."
   category: documenti
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -172,6 +184,7 @@
   description: "Generate a PDF from HTML content (requires barryvdh/laravel-dompdf)."
   category: documenti
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -182,6 +195,7 @@
   description: "Generate a QR code image (via qrserver.com, no API key needed)."
   category: documenti
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -192,6 +206,7 @@
   description: "Generate a .xlsx Excel spreadsheet (requires phpoffice/phpspreadsheet)."
   category: documenti
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -204,6 +219,7 @@
   description: "List recent or filtered Gmail messages (inbox, unread, etc.)."
   category: email
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - GOOGLE_CLIENT_ID
@@ -217,6 +233,7 @@
   description: "Mark a Gmail message as read by ID."
   category: email
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - GOOGLE_CLIENT_ID
@@ -230,6 +247,7 @@
   description: "Read the full content of a Gmail message by ID. Marks it as read."
   category: email
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - GOOGLE_CLIENT_ID
@@ -243,6 +261,7 @@
   description: "Search Gmail using Gmail query syntax (from:, subject:, is:unread, etc.)."
   category: email
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - GOOGLE_CLIENT_ID
@@ -256,6 +275,7 @@
   description: "Compose and send an email via Gmail (OAuth2)."
   category: email
   risk_level: moderate
+  risk_category: message_third_party
   requires_confirmation: true
   env_required:
     - GOOGLE_CLIENT_ID
@@ -269,6 +289,7 @@
   description: "Move a Gmail message to trash by ID."
   category: email
   risk_level: dangerous
+  risk_category: file_delete
   requires_confirmation: true
   env_required:
     - GOOGLE_CLIENT_ID
@@ -282,6 +303,7 @@
   description: "Send an email via the configured SMTP mailer."
   category: email
   risk_level: moderate
+  risk_category: message_third_party
   requires_confirmation: true
   env_required:
     - MAIL_MAILER
@@ -300,7 +322,8 @@
   description: "Run composer install or update."
   category: infrastruttura
   risk_level: moderate
-  requires_confirmation: false
+  risk_category: bash
+  requires_confirmation: true
   env_required: []
 ```
 
@@ -310,7 +333,8 @@
   description: "Perform git operations: pull, status, log (no force push)."
   category: infrastruttura
   risk_level: moderate
-  requires_confirmation: false
+  risk_category: git_push
+  requires_confirmation: true
   env_required: []
 ```
 
@@ -320,7 +344,8 @@
   description: "Run npm install or npm run scripts."
   category: infrastruttura
   risk_level: moderate
-  requires_confirmation: false
+  risk_category: bash
+  requires_confirmation: true
   env_required: []
 ```
 
@@ -332,6 +357,7 @@
   description: "Perform an HTTP GET request to a URL."
   category: rete
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -342,6 +368,7 @@
   description: "Perform an HTTP POST request to a URL with a payload."
   category: rete
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -352,6 +379,7 @@
   description: "Make a GET/POST request to a JSON API and return the parsed response."
   category: rete
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -362,6 +390,7 @@
   description: "Fetch a URL and return a concise LLM-generated summary of the content."
   category: rete
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -372,6 +401,7 @@
   description: "Search the web via DuckDuckGo Instant Answer API and return results."
   category: rete
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -384,6 +414,7 @@
   description: "Execute a shell command with path restrictions enforced."
   category: sistema
   risk_level: dangerous
+  risk_category: bash
   requires_confirmation: true
   env_required: []
 ```
@@ -394,6 +425,7 @@
   description: "Delete a file at an allowed path."
   category: sistema
   risk_level: dangerous
+  risk_category: file_delete
   requires_confirmation: true
   env_required: []
 ```
@@ -404,6 +436,7 @@
   description: "List the contents of a directory."
   category: sistema
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -414,6 +447,7 @@
   description: "Read the contents of a file at an allowed path."
   category: sistema
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -424,6 +458,7 @@
   description: "Search for files by name or content within allowed paths."
   category: sistema
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -434,6 +469,7 @@
   description: "Write or create a file at an allowed path."
   category: sistema
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -444,6 +480,7 @@
   description: "Run a Laravel Artisan command."
   category: sistema
   risk_level: dangerous
+  risk_category: bash
   requires_confirmation: true
   env_required: []
 ```
@@ -454,6 +491,7 @@
   description: "Check the status of running processes on the server."
   category: sistema
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -466,6 +504,7 @@
   description: "Read the SKILL.md file of an installed skill."
   category: skill
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -478,6 +517,7 @@
   description: "Read recent posts from a Facebook Page."
   category: social
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - FACEBOOK_PAGE_ID
@@ -490,6 +530,7 @@
   description: "Post a message (with optional link/image) to a Facebook Page."
   category: social
   risk_level: moderate
+  risk_category: message_third_party
   requires_confirmation: true
   env_required:
     - FACEBOOK_PAGE_ID
@@ -502,6 +543,7 @@
   description: "Publish an image with caption to Instagram Business account."
   category: social
   risk_level: moderate
+  risk_category: message_third_party
   requires_confirmation: true
   env_required:
     - INSTAGRAM_BUSINESS_ACCOUNT_ID
@@ -514,6 +556,7 @@
   description: "Send a WhatsApp message via Meta WhatsApp Business Cloud API."
   category: social
   risk_level: moderate
+  risk_category: message_third_party
   requires_confirmation: true
   env_required:
     - WHATSAPP_PHONE_NUMBER_ID
@@ -528,6 +571,7 @@
   description: "Add an item to a shopping list with optional category and quantity."
   category: spesa
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -538,6 +582,7 @@
   description: "Mark a shopping list item as bought by ID."
   category: spesa
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -548,6 +593,7 @@
   description: "Remove all bought items from a shopping list."
   category: spesa
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -558,6 +604,7 @@
   description: "View items on a shopping list, optionally including bought items."
   category: spesa
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -570,6 +617,7 @@
   description: "Send an image (URL or local path) to the Telegram user."
   category: telegram
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -580,6 +628,7 @@
   description: "Send an audio file as a voice or audio message to the Telegram user."
   category: telegram
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -590,7 +639,8 @@
   description: "Send a message to the authorized Telegram user."
   category: telegram
   risk_level: safe
-  requires_confirmation: false
+  risk_category: message_third_party
+  requires_confirmation: true
   env_required: []
 ```
 
@@ -602,6 +652,7 @@
   description: "Mark a todo item as done by ID."
   category: todo
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -612,6 +663,7 @@
   description: "Create a new todo item in a named list."
   category: todo
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -622,6 +674,7 @@
   description: "Delete a todo item by ID."
   category: todo
   risk_level: moderate
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -632,6 +685,7 @@
   description: "List todos from a named list (or all lists)."
   category: todo
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -644,6 +698,7 @@
   description: "Get current weather for a location using the Open-Meteo free API (no key needed)."
   category: utility
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required: []
 ```
@@ -656,6 +711,7 @@
   description: "Analyze or describe an image using GPT-4o vision. Accepts a local file path or public URL."
   category: visione
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - OPENAI_API_KEY
@@ -667,6 +723,7 @@
   description: "Generate an image with DALL-E 3. Returns the public image URL."
   category: visione
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - OPENAI_API_KEY
@@ -678,6 +735,7 @@
   description: "Generate an image via OpenAI DALL-E 3 and return the URL."
   category: visione
   risk_level: safe
+  risk_category: null
   requires_confirmation: false
   env_required:
     - OPENAI_API_KEY
@@ -685,5 +743,6 @@
 
 ## Changelog
 
+- [2026-05-05T15:41:25+00:00] Re-export (no structural changes).
 - [2026-05-05T15:36:26+00:00] Added: working_memory_append, working_memory_read
 - [2026-05-05T15:32:31+00:00] Initial export. 56 tool registrati.

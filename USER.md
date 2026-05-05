@@ -8,6 +8,7 @@
 
 | Campo | Valore |
 |---|---|
+| Nome | Ronk |
 | Email | nbdy88@gmail.com |
 | Lingua preferita | Italiano |
 | Fuso orario | Europe/Rome (UTC+1 invernale / UTC+2 estivo) |

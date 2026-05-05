@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\RiskCategory;
 use App\Enums\RiskLevel;
 use App\Enums\ToolType;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,7 @@ class Tool extends Model
         'config_keys',
         'input_schema',
         'risk_level',
+        'risk_category',
         'requires_confirmation',
         'is_active',
     ];
@@ -27,6 +29,7 @@ class Tool extends Model
     protected $casts = [
         'type'                  => ToolType::class,
         'risk_level'            => RiskLevel::class,
+        'risk_category'         => RiskCategory::class,
         'config'                => 'array',
         'config_keys'           => 'array',
         'input_schema'          => 'array',

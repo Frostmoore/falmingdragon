@@ -140,6 +140,10 @@ class ExportRegistryCommand extends Command
                 $registryLines[] = "  description: \"{$desc}\"";
                 $registryLines[] = "  category: {$cat}";
                 $registryLines[] = "  risk_level: " . ($tool->risk_level->value ?? (string) $tool->risk_level);
+                $riskCat = $tool->risk_category instanceof \App\Enums\RiskCategory
+                    ? $tool->risk_category->value
+                    : ($tool->risk_category ?? 'null');
+                $registryLines[] = "  risk_category: {$riskCat}";
                 $registryLines[] = "  requires_confirmation: " . ($tool->requires_confirmation ? 'true' : 'false');
                 if (empty($envRequired)) {
                     $registryLines[] = "  env_required: []";
