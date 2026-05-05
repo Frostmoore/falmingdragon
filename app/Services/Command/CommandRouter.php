@@ -47,6 +47,7 @@ class CommandRouter
             arguments:            $arguments,
             definition:           $definition,
             requiresConfirmation: $definition->is_dangerous
+                && ! $definition->skip_confirmation
                 && config('flamingdragon.security.dangerous_commands_require_confirmation', true),
             executionMode:        $executionMode,
             naturalLanguageInput: $naturalLanguage,

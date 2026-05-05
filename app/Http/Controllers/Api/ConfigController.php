@@ -52,9 +52,10 @@ class ConfigController extends Controller
             'execution_mode' => 'nullable|in:sync,async,auto',
             'timeout_seconds' => 'nullable|integer|min:1|max:3600',
             'tools_allowed'  => 'nullable|array',
-            'is_dangerous'   => 'nullable|boolean',
-            'is_active'      => 'nullable|boolean',
-            'skill_required' => 'nullable|string|max:100',
+            'is_dangerous'      => 'nullable|boolean',
+            'skip_confirmation' => 'nullable|boolean',
+            'is_active'         => 'nullable|boolean',
+            'skill_required'    => 'nullable|string|max:100',
         ]);
 
         $command->update($data);

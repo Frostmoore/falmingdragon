@@ -88,6 +88,59 @@ class TelegramParser
     }
 
     /**
+     * Extract photo info from a Telegram update.
+     * Returns the largest available photo (last in the array) with file_id, width, height.
+     *
+     * @param  array<string, mixed>  $update
+     * @return array{file_id: string, width: int, height: int}|null
+     */
+    public function extractPhoto(array $update): ?array
+    {
+        $photos = $update['message']['photo'] ?? null;
+        if (empty($photos) || ! is_array($photos)) {
+            return null;
+        }
+        // Telegram sends photos in multiple sizes; last is the largest
+        $largest = end($photos);
+        return [
+            'file_id' => $largest['file_id'],
+            'width'   => $largest['width']  ?? 0,
+            'height'  => $largest['height'] ?? 0,
+        ];
+    }
+
+    /**
+     * Extract voice message info from a Telegram update.
+     * Returns file_id, duration, mime_type.
+     *
+     * @param  array<string, mixed>  $update
+     * @return array{file_id: string, duration: int, mime_type: string}|null
+     */
+    public function extractVoice(array $update): ?array
+    {
+        $voice = $update['message']['voice'] ?? null;
+        if (empty($voice) || ! is_array($voice)) {
+            return null;
+        }
+        return [
+            'file_id'   => $voice['file_id'],
+            'duration'  => $voice['duration']  ?? 0,
+            'mime_type' => $voice['mime_type'] ?? 'audio/ogg',
+        ];
+    }
+
+    /**
+     * Extract caption from a photo/video/audio message.
+     *
+     * @param  array<string, mixed>  $update
+     * @return string|null
+     */
+    public function extractCaption(array $update): ?string
+    {
+        return $update['message']['caption'] ?? null;
+    }
+
+    /**
      * Determine whether a Telegram update is a message (not just an edited message, etc.).
      *
      * @param  array<string, mixed>  $update

@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l \"e:/coding/XAMPP/htdocs/flamingdragon/app/Http/Controllers/Api/TelegramWebhookController.php\")",
+      "Bash(php -l \"e:/coding/XAMPP/htdocs/flamingdragon/app/Services/Agent/ToolExecutor.php\")",
+      "Bash(php -l \"e:/coding/XAMPP/htdocs/flamingdragon/app/Services/Agent/AgentOrchestrator.php\")",
+      "Bash(php \"e:/coding/XAMPP/htdocs/flamingdragon/artisan\" route:list --path=webhook)",
+      "Bash(php \"e:/coding/XAMPP/htdocs/flamingdragon/artisan\" tinker --execute=\"echo App\\\\Models\\\\Tool::where\\('type','action'\\)->pluck\\('name'\\)->implode\\(', '\\);\")",
+      "Bash(php e:/coding/XAMPP/htdocs/flamingdragon/artisan tinker '--execute=DB::table\\('\\\\''fd_tools'\\\\''\\)->where\\('\\\\''type'\\\\'','\\\\''action'\\\\''\\)->pluck\\('\\\\''name'\\\\''\\)->each\\(fn\\($n\\)=>print\\($n.\"\\\\n\"\\)\\);')",
+      "Bash(php e:/coding/XAMPP/htdocs/flamingdragon/artisan tinker '--execute=echo DB::getTablePrefix\\(\\); $tables = DB::select\\('\\\\''SHOW TABLES'\\\\''\\); echo json_encode\\(array_slice\\(array_map\\(fn\\($t\\)=>\\(array\\)$t, $tables\\), 0, 5\\)\\);')",
+      "Bash(php \"e:/coding/XAMPP/htdocs/flamingdragon/artisan\" tinker --execute=\"echo DB::table\\('tools'\\)->where\\('type','action'\\)->pluck\\('name'\\)->implode\\(', '\\);\")",
+      "Bash(php e:/coding/XAMPP/htdocs/flamingdragon/artisan tinker '--execute=DB::select\\('\\\\''SHOW TABLES'\\\\''\\) |> array_map\\(fn\\($t\\)=>\\(array\\)$t, ?\\) |> array_column\\(?, '\\\\''Tables_in_flamingdragon'\\\\''\\) |> implode\\('\\\\'', '\\\\'', ?\\) |> print\\(?\\);')",
+      "Bash(> \"e:/coding/XAMPP/htdocs/flamingdragon/storage/logs/laravel.log\")",
+      "Bash(php \"e:/coding/XAMPP/htdocs/flamingdragon/artisan\" config:clear)",
+      "Bash(php \"e:/coding/XAMPP/htdocs/flamingdragon/artisan\" cache:clear)",
+      "Bash(curl -s -X POST http://localhost/flamingdragon/public/api/telegram/webhook -H 'Content-Type: application/json' -d '{\"message\":{\"chat\":{\"id\":82472920},\"message_id\":1,\"text\":\"/help\",\"from\":{\"id\":82472920}}}')",
+      "Bash(curl -s -X POST http://localhost/flamingdragon/public/api/telegram/webhook -H 'Content-Type: application/json' -H 'X-Telegram-Bot-Api-Secret-Token: g6md1yoUv7MlSkCIo3QnhAZrL1giVnh5' -d '{\"message\":{\"chat\":{\"id\":82472920},\"message_id\":1,\"text\":\"/help\",\"from\":{\"id\":82472920}}}')",
+      "Bash(curl -s -X POST http://localhost/flamingdragon/public/api/telegram/webhook -H 'Content-Type: application/json' -H 'X-Telegram-Bot-Api-Secret-Token: g6md1yoUv7MlSkCIo3QnhAZrL1giVnh5' -d '{\"message\":{\"chat\":{\"id\":82472920},\"message_id\":2,\"photo\":[{\"file_id\":\"SMALL\",\"width\":100,\"height\":100},{\"file_id\":\"LARGE_FILE_ID\",\"width\":800,\"height\":600}],\"caption\":\"Cosa vedi?\",\"from\":{\"id\":82472920}}}')",
+      "Bash(php -l \"e:/coding/XAMPP/htdocs/flamingdragon/app/Services/Llm/LlmResponse.php\")",
+      "Bash(php -l \"e:/coding/XAMPP/htdocs/flamingdragon/app/Services/Llm/Providers/AnthropicProvider.php\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost/flamingdragon/public/\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost/flamingdragon/public/api/fd/health\")"
+    ]
+  }
+}

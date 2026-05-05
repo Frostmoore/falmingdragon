@@ -17,6 +17,8 @@ class Tool extends Model
         'type',
         'handler_class',
         'config',
+        'config_keys',
+        'input_schema',
         'risk_level',
         'requires_confirmation',
         'is_active',
@@ -26,7 +28,15 @@ class Tool extends Model
         'type'                  => ToolType::class,
         'risk_level'            => RiskLevel::class,
         'config'                => 'array',
+        'config_keys'           => 'array',
+        'input_schema'          => 'array',
         'requires_confirmation' => 'boolean',
         'is_active'             => 'boolean',
     ];
+
+    /** PHP method name in ToolExecutor for this builtin tool. */
+    public function executorMethod(): string
+    {
+        return 'run' . str_replace('_', '', ucwords($this->name, '_'));
+    }
 }

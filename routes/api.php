@@ -52,9 +52,12 @@ Route::prefix('fd')->name('api.fd.')->group(function () {
     Route::post('/tools/{id}/toggle', [ToolController::class, 'toggle'])->name('tools.toggle');
 
     // Memory
-    Route::get('/memory',        [MemoryController::class, 'index'])->name('memory.index');
-    Route::post('/memory',       [MemoryController::class, 'store'])->name('memory.store');
-    Route::delete('/memory/{id}', [MemoryController::class, 'destroy'])->name('memory.destroy');
+    Route::get('/memory',              [MemoryController::class, 'index'])->name('memory.index');
+    Route::post('/memory',             [MemoryController::class, 'store'])->name('memory.store');
+    Route::patch('/memory/{id}',       [MemoryController::class, 'update'])->name('memory.update');
+    Route::delete('/memory/{id}',      [MemoryController::class, 'destroy'])->name('memory.destroy');
+    Route::delete('/memory',           [MemoryController::class, 'destroyNamespace'])->name('memory.destroy-namespace');
+    Route::post('/memory/backfill',    [MemoryController::class, 'backfillEmbeddings'])->name('memory.backfill');
 
     // LLM Providers
     Route::get('/providers',                    [ConfigController::class, 'providersIndex'])->name('providers.index');

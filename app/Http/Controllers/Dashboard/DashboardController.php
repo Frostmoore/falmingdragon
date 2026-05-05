@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Dashboard;
 use App\Enums\AgentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AgentSession;
-use App\Models\LlmProvider;
 use App\Services\Telegram\TelegramService;
 use Illuminate\View\View;
 
@@ -31,7 +30,11 @@ class DashboardController extends Controller
             'sum(tokens_input) as total_in, sum(tokens_output) as total_out'
         )->where('created_at', '>=', now()->startOfDay())->first();
 
-        $defaultProvider = LlmProvider::where('is_default', true)->first();
+        // Read from config/env — same source used by LlmRouter at runtime
+        $defaultProvider = (object) [
+            'name'          => config('flamingdragon.llm.default_provider', 'anthropic'),
+            'default_model' => config('flamingdragon.llm.default_model', ''),
+        ];
 
         $webhookInfo = [];
         try {

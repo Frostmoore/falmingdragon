@@ -63,6 +63,7 @@
                     <th class="px-4 py-3 text-left">Mode</th>
                     <th class="px-4 py-3 text-left">Tools</th>
                     <th class="px-4 py-3 text-center">Dangerous</th>
+                    <th class="px-4 py-3 text-center" title="Skip confirmation even if dangerous">Skip Confirm</th>
                     <th class="px-4 py-3 text-center">Active</th>
                     <th class="px-4 py-3"></th>
                 </tr>
@@ -77,7 +78,22 @@
                             {{ implode(', ', $command->tools_allowed ?? []) ?: '—' }}
                         </td>
                         <td class="px-4 py-3 text-center">
-                            {{ $command->is_dangerous ? '⚠' : '—' }}
+                            @if($command->is_dangerous)
+                                <span class="text-yellow-500" title="Dangerous — requires confirmation">⚠</span>
+                            @else
+                                <span class="text-gray-700">—</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            @if($command->is_dangerous)
+                                <button onclick="toggleSkipConfirm({{ $command->id }}, {{ $command->skip_confirmation ? 'true' : 'false' }})"
+                                        title="{{ $command->skip_confirmation ? 'Confirmation bypassed — click to re-enable' : 'Click to bypass confirmation' }}"
+                                        class="text-xs px-2 py-0.5 rounded transition {{ $command->skip_confirmation ? 'bg-green-900 text-green-300 hover:bg-red-900 hover:text-red-300' : 'bg-gray-800 text-gray-600 hover:bg-yellow-900 hover:text-yellow-300' }}">
+                                    {{ $command->skip_confirmation ? '✓ bypassed' : 'require' }}
+                                </button>
+                            @else
+                                <span class="text-gray-700 text-xs">—</span>
+                            @endif
                         </td>
                         <td class="px-4 py-3 text-center">
                             <span class="{{ $command->is_active ? 'text-green-400' : 'text-gray-600' }}">
@@ -113,6 +129,18 @@ async function toggleCommand(id) {
 async function deleteCommand(id) {
     if (!confirm('Delete this command?')) return;
     await fetch(`/api/fd/commands/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf } });
+    location.reload();
+}
+async function toggleSkipConfirm(id, currentlySkipped) {
+    const msg = currentlySkipped
+        ? 'Re-enable confirmation for this dangerous command?'
+        : 'Bypass confirmation for this dangerous command? It will execute immediately without asking.';
+    if (!confirm(msg)) return;
+    await fetch(`/api/fd/commands/${id}`, {
+        method: 'PUT',
+        headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skip_confirmation: !currentlySkipped }),
+    });
     location.reload();
 }
 </script>

@@ -203,24 +203,79 @@
         </div>
     </section>
 
-    {{-- Telegram --}}
-    <section>
-        <h2 class="text-sm font-semibold text-gray-300 mb-3">Telegram</h2>
-        <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 space-y-2 text-xs">
-            <div class="flex gap-3">
-                <span class="text-gray-500 w-32">Bot Token</span>
-                @php $hasToken = !empty(config('flamingdragon.telegram.bot_token')); @endphp
-                <span class="{{ $hasToken ? 'text-green-400' : 'text-red-400' }}">
-                    {{ $hasToken ? '● Configured' : '✗ Not set — add FD_TELEGRAM_BOT_TOKEN to .env' }}
-                </span>
+    {{-- Telegram Webhook --}}
+    <section x-data="{
+        webhookUrl: '{{ addslashes(config('flamingdragon.telegram.bot_token') ? url('/api/telegram/webhook') : '') }}',
+        saving: false,
+        result: null,
+
+        async update() {
+            this.saving = true;
+            this.result = null;
+            try {
+                const r = await fetch('{{ route('settings.update-webhook') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ webhook_url: this.webhookUrl }),
+                });
+                this.result = await r.json();
+            } catch(e) {
+                this.result = { success: false, message: e.message };
+            } finally {
+                this.saving = false;
+            }
+        },
+    }">
+        <h2 class="text-sm font-semibold text-gray-300 mb-3">Telegram Webhook</h2>
+        <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 space-y-4">
+
+            <div class="grid grid-cols-1 gap-2 text-xs">
+                <div class="flex gap-3">
+                    <span class="text-gray-500 w-32">Bot Token</span>
+                    @php $hasToken = !empty(config('flamingdragon.telegram.bot_token')); @endphp
+                    <span class="{{ $hasToken ? 'text-green-400' : 'text-red-400' }}">
+                        {{ $hasToken ? '● Configured' : '✗ Not set' }}
+                    </span>
+                </div>
+                <div class="flex gap-3">
+                    <span class="text-gray-500 w-32">Current URL</span>
+                    <code class="text-gray-400">{{ url('/api/telegram/webhook') }}</code>
+                </div>
             </div>
-            <div class="flex gap-3">
-                <span class="text-gray-500 w-32">Webhook URL</span>
-                <code class="text-gray-400">{{ url('/api/telegram/webhook') }}</code>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-2">
+                    Webhook URL
+                    <span class="text-gray-600 font-normal ml-1">— update this when your ngrok/domain changes</span>
+                </label>
+                <div class="flex gap-2">
+                    <input type="text" x-model="webhookUrl"
+                           placeholder="https://xxxx.ngrok-free.app/api/telegram/webhook"
+                           class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono text-gray-200 placeholder-gray-600 focus:outline-none focus:border-brand">
+                    <button @click="update()" :disabled="saving"
+                            class="px-4 py-2 bg-brand hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition whitespace-nowrap">
+                        <span x-show="!saving">Update Webhook</span>
+                        <span x-show="saving" class="animate-pulse">Updating…</span>
+                    </button>
+                </div>
             </div>
-            <p class="text-gray-600 pt-2">
-                Set the webhook manually by calling:
-                <code class="text-gray-400">https://api.telegram.org/bot{TOKEN}/setWebhook?url={{ url('/api/telegram/webhook') }}</code>
+
+            <div x-show="result" x-cloak class="text-sm">
+                <div x-show="result?.success" class="text-green-400">
+                    ✓ <span x-text="result?.description ?? 'Webhook updated successfully'"></span>
+                </div>
+                <div x-show="!result?.success" class="text-red-400">
+                    ✗ <span x-text="result?.message"></span>
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-600">
+                Calls Telegram's <code class="text-gray-500">setWebhook</code> API directly.
+                Use this every time your ngrok URL changes without having to redo the wizard.
             </p>
         </div>
     </section>

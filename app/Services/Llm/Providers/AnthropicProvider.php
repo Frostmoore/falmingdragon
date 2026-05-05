@@ -63,8 +63,9 @@ class AnthropicProvider implements LlmProviderInterface
 
             $content   = '';
             $toolCalls = [];
+            $rawBlocks = $data['content'] ?? [];
 
-            foreach ($data['content'] ?? [] as $block) {
+            foreach ($rawBlocks as $block) {
                 if ($block['type'] === 'text') {
                     $content .= $block['text'];
                 } elseif ($block['type'] === 'tool_use') {
@@ -82,6 +83,7 @@ class AnthropicProvider implements LlmProviderInterface
                 inputTokens:  $data['usage']['input_tokens'] ?? 0,
                 outputTokens: $data['usage']['output_tokens'] ?? 0,
                 stopReason:   $data['stop_reason'] ?? 'end_turn',
+                rawBlocks:    $rawBlocks,
             );
         } catch (Throwable $e) {
             Log::error('[AnthropicProvider] chat() failed.', ['error' => $e->getMessage()]);

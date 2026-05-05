@@ -46,9 +46,13 @@
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">
+                    <a href="{{ route('skills.show', $skill->id) }}"
+                       class="px-3 py-1 bg-brand hover:bg-orange-600 text-white text-xs rounded transition">
+                        Configure
+                    </a>
                     <a href="{{ route('skills.edit', $skill->id) }}"
                        class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition">
-                        Edit
+                        Edit MD
                     </a>
                     <button onclick="toggleSkill({{ $skill->id }}, this)"
                             class="px-3 py-1 text-xs rounded transition {{ $skill->is_active ? 'bg-yellow-900 text-yellow-300 hover:bg-yellow-800' : 'bg-green-900 text-green-300 hover:bg-green-800' }}">

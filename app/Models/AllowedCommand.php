@@ -19,15 +19,18 @@ class AllowedCommand extends Model
         'llm_provider_override',
         'llm_model_override',
         'skill_required',
+        'system_prompt',
         'is_dangerous',
+        'skip_confirmation',
         'is_active',
     ];
 
     protected $casts = [
-        'execution_mode' => ExecutionMode::class,
-        'tools_allowed'  => 'array',
-        'is_dangerous'   => 'boolean',
-        'is_active'      => 'boolean',
+        'execution_mode'    => ExecutionMode::class,
+        'tools_allowed'     => 'array',
+        'is_dangerous'      => 'boolean',
+        'skip_confirmation' => 'boolean',
+        'is_active'         => 'boolean',
     ];
 
     /** Resolve the effective execution mode (auto → sync by default unless overridden by orchestrator). */

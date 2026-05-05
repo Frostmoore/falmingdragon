@@ -7,6 +7,7 @@ namespace App\Services\Llm;
 use App\Models\AllowedCommand;
 use App\Models\Memory;
 use App\Models\Skill;
+use App\Models\Tool;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -17,13 +18,13 @@ class PromptBuilder
     /**
      * Build the full system prompt for an agent session.
      *
-     * @param  AllowedCommand        $command
-     * @param  array<string>         $grantedTools
-     * @param  array<Memory>         $memories
-     * @param  Skill|null            $skill
-     * @param  int                   $maxToolCalls
-     * @param  int                   $timeoutSeconds
-     * @return string
+     * @param  AllowedCommand              $command
+     * @param  array<string>               $grantedTools
+     * @param  array<Memory>               $memories
+     * @param  Skill|null                  $skill
+     * @param  int                         $maxToolCalls
+     * @param  int                         $timeoutSeconds
+     * @param  array<int, array>           $toolDefinitions  Full schemas from AgentOrchestrator
      */
     public function build(
         AllowedCommand $command,
@@ -32,15 +33,20 @@ class PromptBuilder
         ?Skill $skill,
         int $maxToolCalls,
         int $timeoutSeconds,
+        array $toolDefinitions = [],
     ): string {
-        $base       = $this->loadBasePrompt();
-        $memoryCtx  = $this->buildMemoryContext($memories);
-        $skillCtx   = $this->buildSkillContext($skill);
-        $toolCtx    = $this->buildToolContext($grantedTools);
+        $base        = $this->loadBasePrompt();
+        $commandCtx  = ! empty($command->system_prompt)
+            ? "## Command-specific Instructions\n\n" . trim($command->system_prompt)
+            : '';
+        $memoryCtx   = $this->buildMemoryContext($memories);
+        $skillCtx    = $this->buildSkillContext($skill);
+        $toolCtx     = $this->buildToolContext($grantedTools, $toolDefinitions);
         $constraints = $this->buildConstraints($command, $maxToolCalls, $timeoutSeconds);
 
         return implode("\n\n", array_filter([
             $base,
+            $commandCtx,
             $memoryCtx,
             $skillCtx,
             $toolCtx,
@@ -49,8 +55,45 @@ class PromptBuilder
     }
 
     /**
-     * Load the base system prompt from file.
+     * Build a compact capability catalog for the NL classifier.
+     * Returns a plain text block describing every active command + its skill.
      */
+    public function buildCapabilityCatalog(): string
+    {
+        $commands = AllowedCommand::where('is_active', true)
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+
+        $skillMap = Skill::where('is_active', true)
+            ->get()
+            ->keyBy('name');
+
+        $lines = [];
+        foreach ($commands as $cmd) {
+            $line = "- **{$cmd->name}** ({$cmd->category}): {$cmd->description}";
+
+            if ($cmd->skill_required && isset($skillMap[$cmd->skill_required])) {
+                $sk      = $skillMap[$cmd->skill_required];
+                $fm      = $sk->parseFrontmatter();
+                $envReq  = $fm['env_required'] ?? [];
+                if (! empty($envReq)) {
+                    $line .= " [requires: " . implode(', ', $envReq) . "]";
+                }
+            }
+
+            if (! empty($cmd->tools_allowed)) {
+                $line .= " | tools: " . implode(', ', $cmd->tools_allowed);
+            }
+
+            $lines[] = $line;
+        }
+
+        return implode("\n", $lines);
+    }
+
+    // -------------------------------------------------------------------------
+
     private function loadBasePrompt(): string
     {
         $path = config('flamingdragon.llm.system_prompt_path');
@@ -66,17 +109,12 @@ class PromptBuilder
         return <<<'PROMPT'
 You are FlamingDragon, a personal AI agent running on the user's server.
 You execute commands precisely, use only the tools granted to you, and always report results clearly.
-You are NOT a chatbot. You are an execution engine with intelligence.
+You are NOT a chatbot — you are an execution engine with intelligence.
 Never attempt to access resources outside your granted tools and paths.
 Always respond in the same language the user used.
 PROMPT;
     }
 
-    /**
-     * Format relevant memories as context block.
-     *
-     * @param  array<Memory>  $memories
-     */
     private function buildMemoryContext(array $memories): string
     {
         if (empty($memories)) {
@@ -91,9 +129,6 @@ PROMPT;
         return implode("\n", $lines);
     }
 
-    /**
-     * Format the skill instructions block.
-     */
     private function buildSkillContext(?Skill $skill): string
     {
         if ($skill === null) {
@@ -109,30 +144,77 @@ PROMPT;
     }
 
     /**
-     * List the tools available in this session.
+     * Build a rich, detailed tool reference block.
      *
-     * @param  array<string>  $tools
+     * Uses the full JSON schemas from AgentOrchestrator combined with
+     * the human-readable descriptions stored in the DB.
+     *
+     * @param  array<string>      $toolNames
+     * @param  array<int, array>  $toolDefinitions  [{name, description, input_schema}, ...]
      */
-    private function buildToolContext(array $tools): string
+    private function buildToolContext(array $toolNames, array $toolDefinitions): string
     {
-        if (empty($tools)) {
-            return "## Available Tools\nNo tools are available for this session.";
+        if (empty($toolNames)) {
+            return "## Available Tools\n\nNo tools are available for this session.";
         }
 
-        return "## Available Tools\nYou may use the following tools: " . implode(', ', $tools) . '.';
+        // Fetch full descriptions from DB (richer than the hardcoded one-liners)
+        $dbTools = Tool::whereIn('name', $toolNames)->get()->keyBy('name');
+
+        // Index schema definitions by tool name
+        $defsByName = [];
+        foreach ($toolDefinitions as $def) {
+            $defsByName[$def['name']] = $def;
+        }
+
+        $count = count($toolNames);
+        $lines = [
+            "## Available Tools",
+            "",
+            "You have **{$count} tool(s)** available. Call them precisely — wrong parameter names cause errors.",
+            "",
+        ];
+
+        foreach ($toolNames as $name) {
+            $dbTool = $dbTools[$name] ?? null;
+            $def    = $defsByName[$name] ?? null;
+
+            $desc       = $dbTool?->description ?? $def['description'] ?? $name;
+            $properties = $def['input_schema']['properties'] ?? [];
+            $required   = $def['input_schema']['required']   ?? [];
+
+            $lines[] = "### `{$name}`";
+            $lines[] = $desc;
+
+            if (! empty($properties)) {
+                $lines[] = "";
+                $lines[] = "Parameters:";
+                foreach ($properties as $pName => $pDef) {
+                    $pType = $pDef['type'] ?? 'string';
+                    $pDesc = $pDef['description'] ?? '';
+                    $req   = in_array($pName, $required, true) ? ' *(required)*' : ' *(optional)*';
+                    $pLine = "- `{$pName}` ({$pType}){$req}";
+                    if ($pDesc) $pLine .= " — {$pDesc}";
+                    $lines[] = $pLine;
+                }
+            } else {
+                $lines[] = "No parameters required.";
+            }
+
+            $lines[] = "";
+        }
+
+        return implode("\n", $lines);
     }
 
-    /**
-     * Append session constraint metadata.
-     */
     private function buildConstraints(AllowedCommand $command, int $maxToolCalls, int $timeoutSeconds): string
     {
         return <<<CONSTRAINTS
 ## Session Constraints
-- Command: {$command->name}
+- Command: `{$command->name}`
 - Maximum tool calls allowed: {$maxToolCalls}
 - Session timeout: {$timeoutSeconds} seconds
-- If you exceed these limits, the session will be terminated automatically.
+- Stay within these limits. Stop and return your final answer before exceeding them.
 CONSTRAINTS;
     }
 }

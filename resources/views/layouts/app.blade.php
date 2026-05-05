@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — FlamingDragon</title>
+    <link rel="icon" type="image/png" href="{{ asset('storage/logo.png') }}">
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,8 +37,12 @@
     <!-- Sidebar -->
     <aside class="w-56 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col" x-show="sidebarOpen">
         <!-- Logo -->
-        <div class="px-4 py-5 border-b border-gray-800">
-            <span class="text-brand text-xl font-bold tracking-tight">🔥 FlamingDragon</span>
+        <div class="px-4 py-4 border-b border-gray-800">
+            <img src="{{ asset('storage/logo.png') }}"
+                 alt="FlamingDragon"
+                 class="w-full h-auto block"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <span class="text-brand text-xl font-bold tracking-tight hidden">🔥 FlamingDragon</span>
         </div>
 
         <!-- Navigation -->
@@ -50,6 +55,7 @@
                     ['route' => 'tools.index',      'label' => 'Tools',      'icon' => '🔧'],
                     ['route' => 'commands.index',   'label' => 'Commands',   'icon' => '⚡'],
                     ['route' => 'memory.index',     'label' => 'Memory',     'icon' => '🧠'],
+                    ['route' => 'prompts.index',    'label' => 'Prompts',    'icon' => '📝'],
                     ['route' => 'settings.index',   'label' => 'Settings',   'icon' => '⚙️'],
                     ['route' => 'wizard.index',     'label' => 'Setup Wizard', 'icon' => '🧙'],
                 ];

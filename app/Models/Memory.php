@@ -15,14 +15,18 @@ class Memory extends Model
         'namespace',
         'key',
         'value',
+        'embedding',
+        'is_important',
         'memory_type',
         'source',
         'expires_at',
     ];
 
     protected $casts = [
-        'memory_type' => MemoryType::class,
-        'expires_at'  => 'datetime',
+        'memory_type'  => MemoryType::class,
+        'expires_at'   => 'datetime',
+        'embedding'    => 'array',
+        'is_important' => 'boolean',
     ];
 
     /** Determine if this memory entry has expired. */
